@@ -43,6 +43,7 @@ fun MainScreen(
     onSliderChangeFinished: () -> Unit,
     onStartStop: () -> Unit,
     onNavigateToAppList: () -> Unit,
+    onNavigateToLicenses: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -170,6 +171,12 @@ fun MainScreen(
                 )
             }
         }
+
+        // TODO: aboutlibraries プラグインの設定後に有効化
+        // Spacer(modifier = Modifier.height(16.dp))
+        // TextButton(onClick = onNavigateToLicenses) {
+        //     Text("Open Source Licenses")
+        // }
     }
 }
 

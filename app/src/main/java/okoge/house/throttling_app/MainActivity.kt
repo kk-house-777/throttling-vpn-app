@@ -39,6 +39,9 @@ data object MainRoute
 @Serializable
 data object AppListRoute
 
+@Serializable
+data object LicenseRoute
+
 class MainActivity : ComponentActivity() {
 
     private var isVpnRunning by mutableStateOf(false)
@@ -105,9 +108,19 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     onNavigateToAppList = { backStack.add(AppListRoute) },
+                                    // TODO: aboutlibraries プラグインの設定後に有効化
+                                    // onNavigateToLicenses = { backStack.add(LicenseRoute) },
+                                    onNavigateToLicenses = { },
                                     modifier = Modifier.padding(innerPadding),
                                 )
                             }
+                            // TODO: aboutlibraries プラグインの設定後に有効化
+                            // entry<LicenseRoute> {
+                            //     okoge.house.throttling_app.ui.LicenseScreen(
+                            //         onBack = { backStack.removeLastOrNull() },
+                            //         modifier = Modifier.padding(innerPadding),
+                            //     )
+                            // }
                             entry<AppListRoute> {
                                 AppListScreen(
                                     targetApps = targetApps,
