@@ -7,8 +7,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,14 +70,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         repository = TargetAppRepository(applicationContext)
-
         setContent {
             ThrottlingappTheme {
                 val backStack = remember { mutableStateListOf<Any>(MainRoute) }
                 val targetApps by repository.targetApps.collectAsState(initial = emptySet())
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    contentWindowInsets = WindowInsets.safeContent
+                ) { innerPadding ->
                     NavDisplay(
+                        modifier = Modifier.padding(innerPadding),
                         backStack = backStack,
                         onBack = { backStack.removeLastOrNull() },
                         entryProvider = entryProvider {
@@ -111,7 +116,6 @@ class MainActivity : ComponentActivity() {
                                     // TODO: aboutlibraries プラグインの設定後に有効化
                                     // onNavigateToLicenses = { backStack.add(LicenseRoute) },
                                     onNavigateToLicenses = { },
-                                    modifier = Modifier.padding(innerPadding),
                                 )
                             }
                             // TODO: aboutlibraries プラグインの設定後に有効化
@@ -166,7 +170,7 @@ class MainActivity : ComponentActivity() {
             }
             startForegroundService(intent)
             isVpnRunning = true
-            delay(3000L)
+            delay(1000L)
             isTransitioning = false
         }
     }
@@ -178,7 +182,7 @@ class MainActivity : ComponentActivity() {
         startService(intent)
         isVpnRunning = false
         lifecycleScope.launch {
-            delay(3000L)
+            delay(1000L)
             isTransitioning = false
         }
     }
@@ -190,4 +194,5 @@ class MainActivity : ComponentActivity() {
         }
         startService(intent)
     }
+
 }

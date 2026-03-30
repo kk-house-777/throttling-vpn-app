@@ -54,6 +54,11 @@ class ThrottleVpnService : VpnService() {
         return START_STICKY
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        stopVpn()
+    }
+
     override fun onDestroy() {
         stopVpn()
         super.onDestroy()
@@ -90,7 +95,6 @@ class ThrottleVpnService : VpnService() {
 
     private fun stopVpn() {
         Log.i(TAG, "Stopping tun2socks")
-        if (!isRunning) return
         isRunning = false
         tun2sockslib.Tun2sockslib.stop()
         stopForeground(STOP_FOREGROUND_REMOVE)
