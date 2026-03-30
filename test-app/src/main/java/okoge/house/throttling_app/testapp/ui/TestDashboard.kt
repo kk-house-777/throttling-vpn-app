@@ -227,9 +227,9 @@ private fun ResultRow(result: TestResult, modifier: Modifier = Modifier) {
 }
 
 private fun formatSpeed(kbps: Double): String {
-    return if (kbps >= 1024) {
-        String.format(Locale.US, "%.1f MB/s", kbps / 1024.0)
+    return if (kbps >= 1000) {
+        String.format(Locale.US, "%.1f Mbps", kbps / 1000.0)
     } else {
-        String.format(Locale.US, "%.0f KB/s", kbps)
+        String.format(Locale.US, "%.0f kbps", kbps)
     }
 }

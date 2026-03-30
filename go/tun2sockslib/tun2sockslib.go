@@ -1,16 +1,11 @@
 // Package tun2sockslib wraps xjasonlyu/tun2socks v2 engine for Android VpnService.
 //
-// tun2socks は TUN インターフェースから読んだ IP パケット (L3) を
-// TCP/UDP ソケット (L4) に変換してインターネットに転送するライブラリ。
-// 内部で gVisor の TCP/IP スタックを使用している。
+// tun2socks は TUN インターフェースから読んだ IP パケット (L3) をTCP/UDP ソケット (L4) に変換してインターネットに転送するライブラリ。
 //
 // スロットリング（速度制限）は TUN と tun2socks の間に挿入する。
-// Unix socketpair を使い、トークンバケットで速度を制御する:
-//
 //	TUN fd ←→ [スロットルレイヤー] ←→ socketpair ←→ tun2socks engine
 //
-// このラッパーは gomobile bind で .aar にコンパイルされ、
-// Kotlin から呼び出される。
+// このラッパーは gomobile bind で .aar にコンパイルされ、Kotlin から呼び出される。
 package tun2sockslib
 
 import (
@@ -29,9 +24,7 @@ import (
 const mtu = 1500
 
 var (
-	// relayCancel はスロットルゴルーチンを停止するためのキャンセル関数
 	relayCancel context.CancelFunc
-	// tunFile / proxyFile はスロットルレイヤーの両端。SetSpeed で再利用する
 	tunFile   *os.File
 	proxyFile *os.File
 	mu        sync.Mutex
@@ -39,7 +32,7 @@ var (
 
 // Start は TUN fd を受け取り、速度制限付きでパケット転送を開始する。
 //
-// fd:        Android VpnService の ParcelFileDescriptor.detachFd() で取得した整数値
+// fd: Android VpnService の ParcelFileDescriptor.detachFd() で取得した整数値
 // speedKbps: 速度制限 (KB/s)。-1 = Block, 0 = Unlimited, >0 = 速度制限
 //
 // 内部動作:

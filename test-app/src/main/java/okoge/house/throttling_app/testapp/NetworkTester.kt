@@ -135,7 +135,7 @@ class NetworkTester(private val scope: CoroutineScope) {
             if (!response.isSuccessful) throw RuntimeException("HTTP ${response.code}")
             val bytes = response.body?.bytes() ?: return 0.0
             val elapsedSec = (System.nanoTime() - startNs) / 1_000_000_000.0
-            return if (elapsedSec > 0) (bytes.size / 1024.0) / elapsedSec else 0.0
+            return if (elapsedSec > 0) (bytes.size * 8 / 1000.0) / elapsedSec else 0.0
         }
     }
 
@@ -148,7 +148,7 @@ class NetworkTester(private val scope: CoroutineScope) {
             if (!response.isSuccessful) throw RuntimeException("HTTP ${response.code}")
             response.body?.close()
             val elapsedSec = (System.nanoTime() - startNs) / 1_000_000_000.0
-            return if (elapsedSec > 0) (UPLOAD_SIZE_BYTES / 1024.0) / elapsedSec else 0.0
+            return if (elapsedSec > 0) (UPLOAD_SIZE_BYTES * 8 / 1000.0) / elapsedSec else 0.0
         }
     }
 }

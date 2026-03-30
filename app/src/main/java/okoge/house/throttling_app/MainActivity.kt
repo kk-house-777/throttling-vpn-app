@@ -1,7 +1,10 @@
 package okoge.house.throttling_app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -53,6 +56,13 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var repository: TargetAppRepository
 
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ ->
+        // 通知許可の結果に関わらずVPN許可フローへ進む
+        requestVpnPermission()
+    }
+
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -60,7 +70,7 @@ class MainActivity : ComponentActivity() {
             startVpnService()
         } else {
             lifecycleScope.launch {
-                delay(3000L)
+                delay(1000L)
                 isTransitioning = false
             }
         }
@@ -109,7 +119,7 @@ class MainActivity : ComponentActivity() {
                                                 isTransitioning = false
                                                 return@MainScreen
                                             }
-                                            requestVpnPermission()
+                                            requestPermissionsAndStart()
                                         }
                                     },
                                     onNavigateToAppList = { backStack.add(AppListRoute) },
@@ -150,6 +160,16 @@ class MainActivity : ComponentActivity() {
         VpnMode.Block -> -1
         VpnMode.Throttle -> kbpsToKBps(sliderToKbps(sliderValue))
         VpnMode.Unlimited -> 0
+    }
+
+    private fun requestPermissionsAndStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            requestVpnPermission()
+        }
     }
 
     private fun requestVpnPermission() {
