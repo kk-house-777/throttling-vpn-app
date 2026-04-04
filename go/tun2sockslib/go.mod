@@ -1,6 +1,6 @@
 module tun2sockslib
 
-go 1.25.0
+go 1.26.1
 
 require github.com/xjasonlyu/tun2socks/v2 v2.6.0
 

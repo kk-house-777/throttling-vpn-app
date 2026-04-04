@@ -1,6 +1,5 @@
 // Package tun2sockslib wraps xjasonlyu/tun2socks v2 engine for Android VpnService.
 //
-// tun2socks は TUN インターフェースから読んだ IP パケット (L3) をTCP/UDP ソケット (L4) に変換してインターネットに転送するライブラリ。
 //
 // スロットリング（速度制限）は TUN と tun2socks の間に挿入する。
 //	TUN fd ←→ [スロットルレイヤー] ←→ socketpair ←→ tun2socks engine
