@@ -51,7 +51,8 @@ fun MainScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(horizontal = 24.dp)
+            .padding(top = 24.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -107,7 +108,6 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Slider（対数スケール: 50kbps〜5Mbps）
         val isThrottleMode = selectedMode == VpnMode.Throttle
         val kbps = sliderToKbps(sliderValue)
 
@@ -148,16 +148,17 @@ fun MainScreen(
         }
 
         Text(
-            text = "※ 実際の速度は環境により異なります",
+            text = "Actual speed may vary depending on conditions.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        val canStart = isVpnRunning || targetAppCount > 0
         Button(
             onClick = onStartStop,
-            enabled = !isTransitioning,
+            enabled = canStart && !isTransitioning,
             modifier = Modifier.fillMaxWidth(),
             colors = if (isVpnRunning) {
                 ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
@@ -178,12 +179,20 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "※ アプリを閉じるとVPNは自動的に停止します",
+            text = if (!canStart) {
+                "Add target apps first to start VPN."
+            } else {
+                "VPN stops automatically when the app is closed."
+            },
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (!canStart) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
 
-        // TODO: aboutlibraries プラグインの設定後に有効化
+        // TODO: Enable after aboutlibraries plugin is configured
         // Spacer(modifier = Modifier.height(16.dp))
         // TextButton(onClick = onNavigateToLicenses) {
         //     Text("Open Source Licenses")
@@ -205,33 +214,31 @@ private fun ModeButton(
     }
 }
 
-// --- 対数スケール変換 ---
-// Slider の 0.0〜1.0 を 50kbps〜5000kbps に対数マッピングする。
-// 対数スケールにすることで、低速側（50〜384kbps）を細かく、
-// 高速側（1Mbps〜5Mbps）を粗く操作できる。
+// Logarithmic scale mapping: Slider 0.0–1.0 → 50–5000 kbps.
+// Low speeds (50–384 kbps) get finer control, high speeds (1–5 Mbps) coarser.
 
-private const val MIN_KBPS = 50f     // 2G 相当
-private const val MAX_KBPS = 5000f   // 標準 3G/HSPA+ 相当
+private const val MIN_KBPS = 50f     // ~2G
+private const val MAX_KBPS = 5000f   // ~3G/HSPA+
 private val LN_MIN = ln(MIN_KBPS)
 private val LN_MAX = ln(MAX_KBPS)
 
-/** Slider 値 (0..1) → kbps */
+/** Slider value (0..1) → kbps */
 fun sliderToKbps(slider: Float): Int {
     val kbps = exp(LN_MIN + slider * (LN_MAX - LN_MIN))
     return kbps.roundToInt().coerceIn(MIN_KBPS.toInt(), MAX_KBPS.toInt())
 }
 
-/** kbps → Slider 値 (0..1) */
+/** kbps → Slider value (0..1) */
 fun kbpsToSlider(kbps: Int): Float {
     return ((ln(kbps.toFloat()) - LN_MIN) / (LN_MAX - LN_MIN)).coerceIn(0f, 1f)
 }
 
-/** kbps → KB/s（Go 側に渡す値） */
+/** kbps → KB/s (value passed to Go layer) */
 fun kbpsToKBps(kbps: Int): Int {
     return (kbps / 8f).roundToInt().coerceAtLeast(1)
 }
 
-/** kbps → 表示文字列 */
+/** kbps → display string */
 fun formatKbps(kbps: Int): String {
     return if (kbps >= 1000) {
         String.format("%.1f Mbps", kbps / 1000f)
@@ -240,11 +247,11 @@ fun formatKbps(kbps: Int): String {
     }
 }
 
-/** kbps → 世代ラベル */
+/** kbps → network generation label */
 fun networkGeneration(kbps: Int): String {
     return when {
         kbps <= 100 -> "≈ 2G"
-        kbps <= 500 -> "≈ 低速 3G"
+        kbps <= 500 -> "≈ Slow 3G"
         kbps <= 2000 -> "≈ Fast 3G"
         else -> "≈ 3G/HSPA+"
     }

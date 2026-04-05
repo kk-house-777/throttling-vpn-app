@@ -13,7 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ ->
-        // 通知許可の結果に関わらずVPN許可フローへ進む
+        // Proceed to VPN permission flow regardless of notification permission result
         requestVpnPermission()
     }
 
@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    contentWindowInsets = WindowInsets.safeContent
+                    contentWindowInsets = WindowInsets.systemBars
                 ) { innerPadding ->
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),
@@ -123,12 +123,12 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     onNavigateToAppList = { backStack.add(AppListRoute) },
-                                    // TODO: aboutlibraries プラグインの設定後に有効化
+                                    // TODO: Enable after aboutlibraries plugin is configured
                                     // onNavigateToLicenses = { backStack.add(LicenseRoute) },
                                     onNavigateToLicenses = { },
                                 )
                             }
-                            // TODO: aboutlibraries プラグインの設定後に有効化
+                            // TODO: Enable after aboutlibraries plugin is configured
                             // entry<LicenseRoute> {
                             //     okoge.house.throttling_app.ui.LicenseScreen(
                             //         onBack = { backStack.removeLastOrNull() },
@@ -145,7 +145,6 @@ class MainActivity : ComponentActivity() {
                                         lifecycleScope.launch { repository.removeApp(pkg) }
                                     },
                                     onBack = { backStack.removeLastOrNull() },
-                                    modifier = Modifier.padding(innerPadding),
                                 )
                             }
                         },
@@ -155,7 +154,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Go 側に渡す速度値 (KB/s)。-1=Block, 0=Unlimited, >0=制限
+    // Speed value passed to Go layer (KB/s). -1=Block, 0=Unlimited, >0=Throttle
     private fun currentSpeedKBps(): Int = when (selectedMode) {
         VpnMode.Block -> -1
         VpnMode.Throttle -> kbpsToKBps(sliderToKbps(sliderValue))

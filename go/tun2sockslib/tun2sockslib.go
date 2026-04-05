@@ -1,10 +1,9 @@
 // Package tun2sockslib wraps xjasonlyu/tun2socks v2 engine for Android VpnService.
 //
+// Throttling (rate limiting) is inserted between the TUN interface and tun2socks.
+//	TUN fd <-> [throttle layer] <-> socketpair <-> tun2socks engine
 //
-// スロットリング（速度制限）は TUN と tun2socks の間に挿入する。
-//	TUN fd ←→ [スロットルレイヤー] ←→ socketpair ←→ tun2socks engine
-//
-// このラッパーは gomobile bind で .aar にコンパイルされ、Kotlin から呼び出される。
+// This wrapper is compiled to .aar via gomobile bind and called from Kotlin.
 package tun2sockslib
 
 import (
@@ -20,6 +19,7 @@ import (
 	"github.com/xjasonlyu/tun2socks/v2/engine"
 )
 
+// This is based on https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/network_mtu.html
 const mtu = 1500
 
 var (
@@ -29,31 +29,33 @@ var (
 	mu        sync.Mutex
 )
 
-// Start は TUN fd を受け取り、速度制限付きでパケット転送を開始する。
+// Start receives a TUN fd and begins packet forwarding with rate limiting.
 //
-// fd: Android VpnService の ParcelFileDescriptor.detachFd() で取得した整数値
-// speedKbps: 速度制限 (KB/s)。-1 = Block, 0 = Unlimited, >0 = 速度制限
+// fd: integer obtained from Android VpnService's ParcelFileDescriptor.detachFd()
+// speedKbps: rate limit (KB/s). -1 = Block, 0 = Unlimited, >0 = Throttle
 //
-// 内部動作:
-//  1. Unix socketpair を作成（双方向パイプ）
-//  2. socketpair の片端 (engineFd) を tun2socks に渡す
-//  3. もう片端 (proxyFd) と TUN fd の間でパケットを中継
-//  4. 中継時にトークンバケットで速度制限を適用
+// Internal flow:
+//  1. Create a Unix socketpair (bidirectional pipe)
+//  2. Pass one end (engineFd) to tun2socks
+//  3. Relay packets between the other end (proxyFd) and the TUN fd
+//  4. Apply token bucket rate limiting during relay
 func Start(fd int, speedKbps int) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	// Unix socketpair を作成
-	// SOCK_DGRAM を使うことでパケット境界が保持される（IP パケット単位で送受信）
+	// Create Unix socketpair.
+	// SOCK_DGRAM preserves packet boundaries (send/receive in IP packet units).
+	// fds : ここのはメモリ上の仮想的なネットワークケーブルの両端、配列が二つ
 	fds, err := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "socketpair failed: %v\n", err)
 		return
 	}
-	proxyFd := fds[0] // スロットルレイヤーが使う側
-	engineFd := fds[1] // tun2socks engine に渡す側
+    // TUN -> (throttle) -> socketpair(ここの両端のfd) -> tun2socks -> internet
+	proxyFd := fds[0]  // used by throttle layer
+	engineFd := fds[1] // passed to tun2socks engine
 
-	// tun2socks engine を socketpair の片端で起動
+	// Start tun2socks engine with one end of the socketpair
 	key := &engine.Key{
 		Device: fmt.Sprintf("fd://%d", engineFd),
 		Proxy:  "direct://",
@@ -62,21 +64,21 @@ func Start(fd int, speedKbps int) {
 	engine.Insert(key)
 	engine.Start()
 
-	// File ハンドルを保持（SetSpeed で再利用）
+	// Retain file handles (reused by SetSpeed)
 	tunFile = os.NewFile(uintptr(fd), "tun")
 	proxyFile = os.NewFile(uintptr(proxyFd), "proxy")
 
-	// スロットルゴルーチンを起動
+	// Start throttle goroutines
 	startRelay(speedKbps)
 }
 
-// SetSpeed は動的に速度制限を変更する。VPN の再起動は不要。
+// SetSpeed dynamically changes the rate limit. No VPN restart required.
 //
-// speedKbps: -1 = Block, 0 = Unlimited, >0 = 速度制限 (KB/s)
+// speedKbps: -1 = Block, 0 = Unlimited, >0 = Throttle (KB/s)
 //
-// 実装: 既存のスロットルゴルーチンを cancel して新しい limiter で再起動する。
-// rate.Limiter.WaitN() がブロック中だと SetLimit() だけでは起きないため、
-// ゴルーチンごと再起動する必要がある。
+// Implementation: cancels existing throttle goroutines and restarts with new limiters.
+// Simply calling SetLimit() on rate.Limiter is insufficient because WaitN() may be
+// blocked, so the goroutines must be restarted entirely.
 func SetSpeed(speedKbps int) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -85,17 +87,17 @@ func SetSpeed(speedKbps int) {
 		return
 	}
 
-	// 既存のゴルーチンを停止
+	// Stop existing goroutines
 	if relayCancel != nil {
 		relayCancel()
 	}
 
-	// 新しい limiter でゴルーチンを再起動
+	// Restart goroutines with new limiters
 	startRelay(speedKbps)
 }
 
-// Stop はパケット転送を停止し、リソースを解放する。
-// tunFile (dup した TUN fd) を close することで、OS が VPN インターフェースを解放する。
+// Stop halts packet forwarding and releases resources.
+// Closing tunFile (dup'd TUN fd) causes the OS to release the VPN interface.
 func Stop() {
 	mu.Lock()
 	defer mu.Unlock()
@@ -105,8 +107,8 @@ func Stop() {
 		relayCancel = nil
 	}
 	engine.Stop()
-	// dup した fd を閉じる。これにより OS が TUN への参照がなくなったことを認識し、
-	// VPN インターフェースが完全に閉じてステータスバーの鍵アイコンが消える。
+	// Close the dup'd fd. This lets the OS recognize there are no more references
+	// to the TUN, fully closing the VPN interface and removing the key icon from the status bar.
 	if tunFile != nil {
 		tunFile.Close()
 		tunFile = nil
@@ -117,65 +119,67 @@ func Stop() {
 	}
 }
 
-// startRelay はスロットルゴルーチンを起動する。mu を保持した状態で呼ぶこと。
+// startRelay launches throttle goroutines. Must be called with mu held.
 //
-// speedKbps: -1 = Block, 0 = Unlimited, >0 = 速度制限
+// speedKbps: -1 = Block, 0 = Unlimited, >0 = Throttle
 func startRelay(speedKbps int) {
 	ul, dl := makeLimiters(speedKbps)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	relayCancel = cancel
 
-	// アップロード方向: TUN → (スロットル) → socketpair → tun2socks → internet
+	// Upload: TUN -> (throttle) -> socketpair -> tun2socks -> internet
 	go throttleRelay(ctx, tunFile, proxyFile, ul)
 
-	// ダウンロード方向: internet → tun2socks → socketpair → (スロットル) → TUN
+	// Download: internet -> tun2socks -> socketpair -> (throttle) -> TUN
 	go throttleRelay(ctx, proxyFile, tunFile, dl)
 }
 
-// makeLimiters は速度設定に応じたトークンバケットペアを作成する。
+// makeLimiters creates a pair of token bucket limiters based on the speed setting.
 //
-// トークンバケットアルゴリズム:
-//   - バケットに毎秒 (speedKbps * 1024) バイト分のトークンを補充
-//   - パケット送信時にサイズ分のトークンを消費
-//   - トークン不足なら補充されるまで WaitN がブロック（= 速度制限）
+// Token bucket algorithm:
+//   - Refill (speedKbps * 1024) bytes worth of tokens per second
+//   - Consume tokens equal to packet size on each send
+//   - WaitN blocks until tokens are available (= rate limiting)
 func makeLimiters(speedKbps int) (upload, download *rate.Limiter) {
 	switch {
 	case speedKbps < 0:
-		// Block: レート0 → WaitN が永久にブロック → 通信遮断
+		// Block: rate 0 -> WaitN blocks forever -> traffic blocked
 		upload = rate.NewLimiter(0, 0)
 		download = rate.NewLimiter(0, 0)
 	case speedKbps > 0:
-		// Throttle: 指定速度で制限
+		// Throttle: limit to specified speed
 		bytesPerSec := rate.Limit(float64(speedKbps) * 1024)
 		upload = rate.NewLimiter(bytesPerSec, mtu*10)
 		download = rate.NewLimiter(bytesPerSec, mtu*10)
 	default:
-		// Unlimited: 非常に大きなレートで実質無制限
+		// Unlimited: very large rate, effectively no limit
 		upload = rate.NewLimiter(rate.Limit(math.MaxFloat64), math.MaxInt)
 		download = rate.NewLimiter(rate.Limit(math.MaxFloat64), math.MaxInt)
 	}
 	return
 }
 
-// throttleRelay は src から dst へパケットを中継し、limiter で速度制限する。
+// throttleRelay relays packets from src to dst, applying rate limiting via limiter.
 //
-// パケットを1つ読むたびに、そのサイズ分のトークンを消費する。
-// トークンが不足していると WaitN() がブロックし、速度が制限される。
-// context がキャンセルされると WaitN が即座に返り、ゴルーチンが終了する。
+// Each packet read consumes tokens equal to its size from the limiter.
+// If tokens are insufficient, WaitN() blocks until refilled (= rate limiting).
+// When the context is cancelled, WaitN returns immediately and the goroutine exits.
 func throttleRelay(ctx context.Context, src, dst *os.File, limiter *rate.Limiter) {
 	buf := make([]byte, mtu)
 	for {
+	    // 停止チェック
 		select {
 		case <-ctx.Done():
 			return
 		default:
 		}
 
+        // OSからパケットの実態を1500バイト読み取る。fd経由, nはサイズ
 		n, err := src.Read(buf)
 		if err != nil {
 			if ctx.Err() != nil {
-				return // 正常停止
+				return // normal shutdown
 			}
 			continue
 		}
@@ -183,11 +187,13 @@ func throttleRelay(ctx context.Context, src, dst *os.File, limiter *rate.Limiter
 			continue
 		}
 
-		// トークンバケットで速度制限
-		// WaitN はトークンが補充されるまでブロックする。
-		// context がキャンセルされると即座にエラーを返す。
+		// Token bucket rate limiting.
+		// WaitN blocks until enough tokens are available.
+		// Returns immediately with error if context is cancelled.
+		//「nバイト分のトークンが貯まるまで待つ」。例えば 100 KB/s 制限で 1500
+		// バイトのパケットなら約 15ms 待たされる。
 		if err := limiter.WaitN(ctx, n); err != nil {
-			return // context cancelled → ゴルーチン終了
+			return // context cancelled -> goroutine exit
 		}
 
 		_, err = dst.Write(buf[:n])

@@ -3,6 +3,7 @@ package okoge.house.throttling_app
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.net.VpnService
@@ -14,6 +15,7 @@ class ThrottleVpnService : VpnService() {
 
     private var vpnInterface: ParcelFileDescriptor? = null
     private var isRunning = false
+    private var currentSpeedKBps = 0
 
     companion object {
         private const val TAG = "ThrottleVpnService"
@@ -31,7 +33,12 @@ class ThrottleVpnService : VpnService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        if (intent == null) {
+            // System re-created the service after process kill; stop since there's no valid config.
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        when (intent.action) {
             ACTION_STOP -> {
                 stopVpn()
                 return START_NOT_STICKY
@@ -39,17 +46,20 @@ class ThrottleVpnService : VpnService() {
             ACTION_SET_SPEED -> {
                 val speedKbps = intent.getIntExtra(EXTRA_SPEED_KBPS, 0)
                 Log.i(TAG, "Changing speed to $speedKbps KB/s")
+                currentSpeedKBps = speedKbps
                 tun2sockslib.Tun2sockslib.setSpeed(speedKbps.toLong())
+                updateNotification()
                 return START_STICKY
             }
         }
+        val speedKbps = intent.getIntExtra(EXTRA_SPEED_KBPS, 0)
+        currentSpeedKBps = speedKbps
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(NOTIFICATION_ID, buildNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED)
         } else {
             startForeground(NOTIFICATION_ID, buildNotification())
         }
-        val speedKbps = intent?.getIntExtra(EXTRA_SPEED_KBPS, 0) ?: 0
-        val targetApps = intent?.getStringArrayListExtra(EXTRA_TARGET_APPS) ?: arrayListOf()
+        val targetApps = intent.getStringArrayListExtra(EXTRA_TARGET_APPS) ?: arrayListOf()
         startVpn(speedKbps, targetApps)
         return START_STICKY
     }
@@ -104,18 +114,38 @@ class ThrottleVpnService : VpnService() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
-            "VPN Service",
+            "Throttle VPN",
             NotificationManager.IMPORTANCE_LOW,
         )
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
     }
 
+    private fun updateNotification() {
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, buildNotification())
+    }
+
     private fun buildNotification(): Notification {
+        val openIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, openIntent, PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val modeText = when {
+            currentSpeedKBps < 0 -> "Mode: Block"
+            currentSpeedKBps == 0 -> "Mode: Unlimited"
+            else -> "Mode: Throttle"
+        }
+
         return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Throttle VPN")
-            .setContentText("VPN is active - forwarding test app traffic")
+            .setContentTitle("Throttle VPN Active")
+            .setContentText(modeText)
             .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
             .build()
     }
 }
