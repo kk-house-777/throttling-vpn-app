@@ -22,3 +22,7 @@ local.properties
 
 # Go lock files
 go/*/go.sum
+
+# Extracted AAR contents
+classes.jar
+proguard.txt
