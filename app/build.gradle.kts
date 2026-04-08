@@ -7,16 +7,12 @@ plugins {
 
 android {
     namespace = "okoge.house.throttling_app"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
 
     defaultConfig {
         applicationId = "okoge.house.throttling_app"
         minSdk = 26
         targetSdk = 36
+        compileSdk { version = release(36) }
         versionCode = 1
         versionName = "1.0"
 
@@ -33,6 +29,17 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+    flavorDimensions += "store"
+    productFlavors {
+        create("play") {
+            dimension = "store"
+            applicationIdSuffix = ".play"
+        }
+        create("fdroid") {
+            dimension = "store"
+            applicationIdSuffix = ".fdroid"
         }
     }
     compileOptions {

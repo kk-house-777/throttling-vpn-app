@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プライバシーポリシー - Throttling VPN</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #fafafa;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+        .app-name {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.15rem;
+            margin-top: 28px;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+        p, li {
+            font-size: 0.95rem;
+            color: #444;
+        }
+        p { margin-bottom: 12px; }
+        ul {
+            margin: 8px 0 12px 24px;
+        }
+        li { margin-bottom: 4px; }
+        .updated {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .lang-switch {
+            text-align: right;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+        }
+        .lang-switch a {
+            color: #1976d2;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .lang-switch a:hover { text-decoration: underline; }
+        section[lang="en"] { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="lang-switch">
+        <a onclick="toggleLang()"><span id="lang-toggle">English</span></a>
+    </div>
+
+    <!-- 日本語 -->
+    <section lang="ja" id="sec-ja">
+        <h1>プライバシーポリシー</h1>
+        <p class="app-name">Throttling VPN（dev.kkhouse.throttlingvpn）</p>
+
+        <h2>1. はじめに</h2>
+        <p>本アプリ「Throttling VPN」（以下「本アプリ」）は、開発者 kk-house（以下「開発者」）が提供するネットワーク速度制限テスト用の VPN アプリです。本プライバシーポリシーは、本アプリにおける情報の取り扱いについて説明します。</p>
+
+        <h2>2. 収集する情報</h2>
+        <p>本アプリは、ユーザーの個人情報を一切収集・送信しません。</p>
+        <ul>
+            <li>アカウント登録は不要です</li>
+            <li>アナリティクスやトラッキングツールは使用していません</li>
+            <li>広告 SDK は含まれていません</li>
+            <li>外部サーバーへのデータ送信は行いません</li>
+        </ul>
+
+        <h2>3. VPN サービスについて</h2>
+        <p>本アプリは Android の VpnService API を使用します。VPN 接続はすべてデバイス上でローカルに処理され、ネットワークトラフィックが外部のプロキシやサーバーを経由することはありません。</p>
+        <p>VPN 機能は、選択したアプリの通信速度を制限（スロットリング）する目的でのみ使用され、通信内容の監視・記録・改変は行いません。</p>
+
+        <h2>4. データの保存</h2>
+        <p>以下の設定情報がデバイス内にのみ保存されます。</p>
+        <ul>
+            <li>スロットリング対象として選択したアプリの一覧</li>
+            <li>速度設定値</li>
+        </ul>
+        <p>これらのデータはデバイス外に送信されることはなく、アプリのアンインストール時に削除されます。</p>
+
+        <h2>5. 第三者への提供</h2>
+        <p>本アプリはユーザーデータを収集しないため、第三者への提供・共有・販売は一切ありません。</p>
+
+        <h2>6. 子供のプライバシー</h2>
+        <p>本アプリは13歳未満の子供から意図的に個人情報を収集することはありません。</p>
+
+        <h2>7. ポリシーの変更</h2>
+        <p>本プライバシーポリシーは予告なく変更される場合があります。変更があった場合は本ページを更新します。</p>
+
+        <h2>8. お問い合わせ</h2>
+        <p>本ポリシーに関するお問い合わせは、以下の GitHub リポジトリの Issue よりお願いいたします。</p>
+        <p><a href="https://github.com/kk-house-777/throttlingapp/issues">https://github.com/kk-house-777/throttlingapp/issues</a></p>
+    </section>
+
+    <!-- English -->
+    <section lang="en" id="sec-en">
+        <h1>Privacy Policy</h1>
+        <p class="app-name">Throttling VPN (dev.kkhouse.throttlingvpn)</p>
+
+        <h2>1. Introduction</h2>
+        <p>Throttling VPN ("the App") is a network speed-throttling VPN tool provided by kk-house ("the Developer"). This Privacy Policy describes how information is handled within the App.</p>
+
+        <h2>2. Information We Collect</h2>
+        <p>The App does not collect or transmit any personal information.</p>
+        <ul>
+            <li>No account registration is required</li>
+            <li>No analytics or tracking tools are used</li>
+            <li>No advertising SDKs are included</li>
+            <li>No data is sent to external servers</li>
+        </ul>
+
+        <h2>3. VPN Service</h2>
+        <p>The App uses the Android VpnService API. All VPN connections are processed locally on the device. Network traffic is never routed through any external proxy or server.</p>
+        <p>The VPN functionality is used solely to throttle the network speed of selected apps. It does not monitor, log, or modify the contents of network traffic.</p>
+
+        <h2>4. Data Storage</h2>
+        <p>The following settings are stored locally on the device only:</p>
+        <ul>
+            <li>List of apps selected for throttling</li>
+            <li>Speed configuration values</li>
+        </ul>
+        <p>This data is never transmitted outside the device and is deleted when the App is uninstalled.</p>
+
+        <h2>5. Third-Party Sharing</h2>
+        <p>Since the App does not collect user data, there is no sharing, selling, or disclosure of data to third parties.</p>
+
+        <h2>6. Children's Privacy</h2>
+        <p>The App does not knowingly collect personal information from children under the age of 13.</p>
+
+        <h2>7. Changes to This Policy</h2>
+        <p>This Privacy Policy may be updated from time to time. Any changes will be reflected on this page.</p>
+
+        <h2>8. Contact</h2>
+        <p>For questions about this policy, please open an issue on the GitHub repository:</p>
+        <p><a href="https://github.com/kk-house-777/throttlingapp/issues">https://github.com/kk-house-777/throttlingapp/issues</a></p>
+    </section>
+
+    <p class="updated">Last updated: 2026-04-08</p>
+</div>
+
+<script>
+function toggleLang() {
+    const ja = document.getElementById('sec-ja');
+    const en = document.getElementById('sec-en');
+    const toggle = document.getElementById('lang-toggle');
+    if (ja.style.display === 'none') {
+        ja.style.display = 'block';
+        en.style.display = 'none';
+        toggle.textContent = 'English';
+    } else {
+        ja.style.display = 'none';
+        en.style.display = 'block';
+        toggle.textContent = '日本語';
+    }
+}
+</script>
+</body>
+</html>
