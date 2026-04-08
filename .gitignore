@@ -26,3 +26,7 @@ go/*/go.sum
 # Extracted AAR contents
 classes.jar
 proguard.txt
+
+# Flavor build outputs (AAB/APK)
+app/play/
+app/fdroid/
