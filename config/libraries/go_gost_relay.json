@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:github.com/go-gost/relay",
+    "artifactVersion": "0.5.0",
+    "name": "GOST Relay",
+    "description": "Relay protocol implementation for GOST.",
+    "website": "https://github.com/go-gost/relay",
+    "developers": [
+        {
+            "name": "ginuerzh"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/go-gost/relay.git",
+        "url": "https://github.com/go-gost/relay"
+    },
+    "licenses": [
+        "MIT"
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:golang.org/x/sys",
+    "artifactVersion": "0.42.0",
+    "name": "Go x/sys",
+    "description": "Supplementary system packages for Go.",
+    "website": "https://pkg.go.dev/golang.org/x/sys",
+    "developers": [
+        {
+            "name": "The Go Authors"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://go.googlesource.com/sys",
+        "url": "https://github.com/golang/sys"
+    },
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

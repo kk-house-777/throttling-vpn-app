@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:github.com/gorilla/websocket",
+    "artifactVersion": "1.5.3",
+    "name": "Gorilla WebSocket",
+    "description": "A fast, well-tested and widely used WebSocket implementation for Go.",
+    "website": "https://github.com/gorilla/websocket",
+    "developers": [
+        {
+            "name": "Gorilla Web Toolkit"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/gorilla/websocket.git",
+        "url": "https://github.com/gorilla/websocket"
+    },
+    "licenses": [
+        "BSD-2-Clause"
+    ]
+}

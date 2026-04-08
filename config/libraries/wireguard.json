@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:golang.zx2c4.com/wireguard",
+    "artifactVersion": "0.0.0-20250521234502",
+    "name": "WireGuard Go",
+    "description": "Go implementation of WireGuard.",
+    "website": "https://www.wireguard.com",
+    "developers": [
+        {
+            "name": "Jason A. Donenfeld"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://git.zx2c4.com/wireguard-go",
+        "url": "https://git.zx2c4.com/wireguard-go"
+    },
+    "licenses": [
+        "MIT"
+    ]
+}

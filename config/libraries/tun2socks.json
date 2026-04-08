@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:github.com/xjasonlyu/tun2socks/v2",
+    "artifactVersion": "2.6.0",
+    "name": "tun2socks",
+    "description": "A simple and performant TUN-to-SOCKS proxy, powered by gVisor TCP/IP stack.",
+    "website": "https://github.com/xjasonlyu/tun2socks",
+    "developers": [
+        {
+            "name": "xjasonlyu"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/xjasonlyu/tun2socks.git",
+        "url": "https://github.com/xjasonlyu/tun2socks"
+    },
+    "licenses": [
+        "GPL-3.0-only"
+    ]
+}

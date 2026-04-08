@@ -192,11 +192,10 @@ fun MainScreen(
             },
         )
 
-        // TODO: Enable after aboutlibraries plugin is configured
-        // Spacer(modifier = Modifier.height(16.dp))
-        // TextButton(onClick = onNavigateToLicenses) {
-        //     Text("Open Source Licenses")
-        // }
+         Spacer(modifier = Modifier.height(16.dp))
+         TextButton(onClick = onNavigateToLicenses) {
+             Text("Open Source Licenses")
+         }
     }
 }
 

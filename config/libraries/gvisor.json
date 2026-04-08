@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:gvisor.dev/gvisor",
+    "artifactVersion": "0.0.0-20250523182742",
+    "name": "gVisor",
+    "description": "Application kernel for containers that provides efficient defense-in-depth, including a user-space TCP/IP network stack.",
+    "website": "https://gvisor.dev",
+    "developers": [
+        {
+            "name": "Google LLC"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/google/gvisor.git",
+        "url": "https://github.com/google/gvisor"
+    },
+    "licenses": [
+        "Apache-2.0"
+    ]
+}

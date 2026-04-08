@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:golang.org/x/time",
+    "artifactVersion": "0.15.0",
+    "name": "Go x/time",
+    "description": "Supplementary time packages for Go, including rate limiter.",
+    "website": "https://pkg.go.dev/golang.org/x/time",
+    "developers": [
+        {
+            "name": "The Go Authors"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://go.googlesource.com/time",
+        "url": "https://github.com/golang/time"
+    },
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

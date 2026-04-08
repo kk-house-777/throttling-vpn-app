@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:github.com/go-chi/chi/v5",
+    "artifactVersion": "5.2.1",
+    "name": "chi",
+    "description": "Lightweight, idiomatic and composable router for building Go HTTP services.",
+    "website": "https://github.com/go-chi/chi",
+    "developers": [
+        {
+            "name": "Peter Kieltyka"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/go-chi/chi.git",
+        "url": "https://github.com/go-chi/chi"
+    },
+    "licenses": [
+        "MIT"
+    ]
+}

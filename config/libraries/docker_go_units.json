@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:github.com/docker/go-units",
+    "artifactVersion": "0.5.0",
+    "name": "Docker go-units",
+    "description": "Parse and print size and time units in human-readable format.",
+    "website": "https://github.com/docker/go-units",
+    "developers": [
+        {
+            "name": "Docker, Inc."
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/docker/go-units.git",
+        "url": "https://github.com/docker/go-units"
+    },
+    "licenses": [
+        "Apache-2.0"
+    ]
+}

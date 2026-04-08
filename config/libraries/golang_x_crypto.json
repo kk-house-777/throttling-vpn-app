@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:golang.org/x/crypto",
+    "artifactVersion": "0.49.0",
+    "name": "Go x/crypto",
+    "description": "Supplementary cryptography libraries for Go.",
+    "website": "https://pkg.go.dev/golang.org/x/crypto",
+    "developers": [
+        {
+            "name": "The Go Authors"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://go.googlesource.com/crypto",
+        "url": "https://github.com/golang/crypto"
+    },
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

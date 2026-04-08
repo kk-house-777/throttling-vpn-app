@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import okoge.house.throttling_app.data.TargetAppRepository
 import okoge.house.throttling_app.ui.AppListScreen
+import okoge.house.throttling_app.ui.LicenseScreen
 import okoge.house.throttling_app.ui.MainScreen
 import okoge.house.throttling_app.ui.VpnMode
 import okoge.house.throttling_app.ui.kbpsToKBps
@@ -123,18 +124,15 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     onNavigateToAppList = { backStack.add(AppListRoute) },
-                                    // TODO: Enable after aboutlibraries plugin is configured
-                                    // onNavigateToLicenses = { backStack.add(LicenseRoute) },
-                                    onNavigateToLicenses = { },
+                                    onNavigateToLicenses = { backStack.add(LicenseRoute) },
                                 )
                             }
-                            // TODO: Enable after aboutlibraries plugin is configured
-                            // entry<LicenseRoute> {
-                            //     okoge.house.throttling_app.ui.LicenseScreen(
-                            //         onBack = { backStack.removeLastOrNull() },
-                            //         modifier = Modifier.padding(innerPadding),
-                            //     )
-                            // }
+                             entry<LicenseRoute> {
+                                 LicenseScreen(
+                                     onBack = { backStack.removeLastOrNull() },
+                                     modifier = Modifier.padding(innerPadding),
+                                 )
+                             }
                             entry<AppListRoute> {
                                 AppListScreen(
                                     targetApps = targetApps,

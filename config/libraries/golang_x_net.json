@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:golang.org/x/net",
+    "artifactVersion": "0.52.0",
+    "name": "Go x/net",
+    "description": "Supplementary network libraries for Go.",
+    "website": "https://pkg.go.dev/golang.org/x/net",
+    "developers": [
+        {
+            "name": "The Go Authors"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://go.googlesource.com/net",
+        "url": "https://github.com/golang/net"
+    },
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

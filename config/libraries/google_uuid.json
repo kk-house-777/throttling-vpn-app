@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:github.com/google/uuid",
+    "artifactVersion": "1.6.0",
+    "name": "Google UUID",
+    "description": "Go package for UUIDs based on RFC 4122 and DCE 1.1.",
+    "website": "https://github.com/google/uuid",
+    "developers": [
+        {
+            "name": "Google LLC"
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/google/uuid.git",
+        "url": "https://github.com/google/uuid"
+    },
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

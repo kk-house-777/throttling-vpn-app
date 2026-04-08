@@ -1,0 +1,19 @@
+{
+    "uniqueId": "go:go.uber.org/zap",
+    "artifactVersion": "1.27.0",
+    "name": "Zap",
+    "description": "Blazing fast, structured, leveled logging in Go.",
+    "website": "https://github.com/uber-go/zap",
+    "developers": [
+        {
+            "name": "Uber Technologies, Inc."
+        }
+    ],
+    "scm": {
+        "connection": "scm:git:https://github.com/uber-go/zap.git",
+        "url": "https://github.com/uber-go/zap"
+    },
+    "licenses": [
+        "MIT"
+    ]
+}
