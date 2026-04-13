@@ -1,0 +1,1 @@
+Throttle network speed for selected apps to simulate 2G-3G conditions

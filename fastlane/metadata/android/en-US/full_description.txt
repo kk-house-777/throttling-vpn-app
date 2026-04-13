@@ -1,0 +1,25 @@
+Throttling VPN App is a developer tool that simulates poor network conditions by throttling traffic for specific apps via a local VPN.
+
+Select target apps and control their network speed from 50 kbps (2G) to 5 Mbps (HSPA+) using a logarithmic speed slider. The app uses a token bucket algorithm to accurately limit throughput, powered by a Go-based tun2socks engine with the gVisor TCP/IP stack.
+
+<b>Features:</b>
+
+* <b>Speed control</b> — Adjustable from 50 kbps to 5 Mbps with a logarithmic slider
+* <b>Three modes</b> — Block (blackhole), Throttle (rate-limited), Unlimited (passthrough)
+* <b>Per-app targeting</b> — Choose which apps are affected
+* <b>Real-time adjustment</b> — Change speed without restarting the VPN
+* <b>Persistent app list</b> — Target apps are saved automatically
+
+<b>How it works:</b>
+
+Traffic from selected apps is captured via a TUN interface, passed through a token bucket throttle layer written in Go, and forwarded through the tun2socks/gVisor network stack. This provides accurate and reliable bandwidth limiting at the network level.
+
+<b>Use cases:</b>
+
+* Test how your app behaves on slow networks
+* Simulate 2G/3G conditions for QA and debugging
+* Verify offline/timeout handling in your applications
+
+This app requires VPN permission to function. No data is collected or sent to external servers — all traffic processing happens locally on your device.
+
+Source code: https://github.com/okogehousedev/throttling-vpn-app

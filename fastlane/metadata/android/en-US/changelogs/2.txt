@@ -1,0 +1,6 @@
+Initial release (v1.0.0)
+- VPN-based network throttling from 50 kbps to 5 Mbps
+- Per-app targeting with persistent app list
+- Three modes: Block, Throttle, Unlimited
+- Real-time speed adjustment without VPN restart
+- Adaptive icon support
