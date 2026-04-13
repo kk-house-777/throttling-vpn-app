@@ -27,6 +27,10 @@ go/*/go.sum
 classes.jar
 proguard.txt
 
+# Signing keystores
+*.keystore
+*.jks
+
 # Flavor build outputs (AAB/APK)
 app/play/
 app/fdroid/
