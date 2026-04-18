@@ -6,23 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.aboutlibraries)
 }
-
-val localProperties = Properties()
-rootProject.file("local.properties").let { file ->
-    if (file.exists()) localProperties.load(file.inputStream())
-}
-
 android {
     namespace = "okoge.house.throttling_app"
-
-    signingConfigs {
-        create("fdroidRelease") {
-            storeFile = file(localProperties.getProperty("FDROID_STORE_FILE", ""))
-            storePassword = localProperties.getProperty("FDROID_STORE_PASSWORD", "")
-            keyAlias = localProperties.getProperty("FDROID_KEY_ALIAS", "")
-            keyPassword = localProperties.getProperty("FDROID_KEY_PASSWORD", "")
-        }
-    }
 
     defaultConfig {
         applicationId = "okoge.house.throttling_app"
@@ -56,7 +41,6 @@ android {
         create("fdroid") {
             dimension = "store"
             applicationIdSuffix = ".fdroid"
-            signingConfig = signingConfigs.getByName("fdroidRelease")
         }
     }
     compileOptions {
