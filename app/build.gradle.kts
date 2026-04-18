@@ -1,3 +1,4 @@
+import com.android.build.api.variant.FilterConfiguration.FilterType
 import java.util.Properties
 
 plugins {
@@ -43,6 +44,17 @@ android {
             applicationIdSuffix = ".fdroid"
         }
     }
+    splits {
+        abi {
+            // fdroid フレーバーで有効化、gradle タスク名で判定
+            isEnable = gradle.startParameter.taskRequests.any { task ->
+                task.args.any { it.contains("Fdroid", ignoreCase = true) }
+            }
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+            isUniversalApk = false
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -50,6 +62,28 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+val abiCodes = mapOf(
+    "x86" to 1,
+    "armeabi-v7a" to 2,
+    "x86_64" to 3,
+    "arm64-v8a" to 4,
+)
+
+androidComponents {
+    onVariants { variant ->
+        // fdroid フレーバーのみ ABI split の versionCode を付与
+        if (variant.flavorName == "fdroid") {
+            variant.outputs.forEach { output ->
+                val abi = output.filters.find { it.filterType == FilterType.ABI }?.identifier
+                if (abi != null) {
+                    val abiCode = abiCodes[abi] ?: 0
+                    output.versionCode.set(abiCode * 10 + (output.versionCode.get() ?: 0))
+                }
+            }
+        }
     }
 }
 
