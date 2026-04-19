@@ -80,7 +80,7 @@ androidComponents {
                 val abi = output.filters.find { it.filterType == FilterType.ABI }?.identifier
                 if (abi != null) {
                     val abiCode = abiCodes[abi] ?: 0
-                    output.versionCode.set(abiCode * 10 + (output.versionCode.get() ?: 0))
+                    output.versionCode.set((output.versionCode.get() ?: 0) * 10 + abiCode)
                 }
             }
         }
