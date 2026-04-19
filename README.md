@@ -57,3 +57,27 @@ gomobile bind -target=android -androidapi 26 -o ../../app/libs/tun2socks.aar .
 adb install app/build/outputs/apk/debug/app-debug.apk
 adb install test-app/build/outputs/apk/debug/test-app-debug.apk
 ```
+
+## Version Code Scheme
+
+### Play ストア (universal APK)
+
+`build.gradle.kts` の `versionCode` がそのまま使われる。
+
+### F-Droid (ABI split)
+
+`versionCode * 10 + abiCode` の suffix 方式。
+
+| ABI | abiCode | 例 (versionCode=2) |
+|-----|---------|-------------------|
+| x86 | 1 | 21 |
+| armeabi-v7a | 2 | 22 |
+| x86_64 | 3 | 23 |
+| arm64-v8a | 4 | 24 |
+
+### バージョンアップ時の手順
+
+1. `app/build.gradle.kts` の `versionCode` をインクリメント (例: 2 → 3)
+2. Play は自動で `3` になる
+3. F-Droid は自動で `31, 32, 33, 34` になる（VercodeOperation で算出）
+4. F-Droid metadata (`fdroiddata/metadata/okoge.house.throttling_app.fdroid.yml`) に新ビルドエントリを追加し、commit hash を更新する
