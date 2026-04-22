@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.map
 import okoge.house.throttling_app.BuildConfig
 
 
-private val Context.dataStore by preferencesDataStore(name = "target_apps")
+internal val Context.dataStore by preferencesDataStore(name = "target_apps")
 
 class TargetAppRepository(private val context: Context) {
 

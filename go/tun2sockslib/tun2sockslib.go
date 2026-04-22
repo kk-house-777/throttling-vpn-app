@@ -43,19 +43,14 @@ func Start(fd int, speedKbps int) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	// Create Unix socketpair.
-	// SOCK_DGRAM preserves packet boundaries (send/receive in IP packet units).
-	// fds : ここのはメモリ上の仮想的なネットワークケーブルの両端、配列が二つ
 	fds, err := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "socketpair failed: %v\n", err)
 		return
 	}
-    // TUN -> (throttle) -> socketpair(ここの両端のfd) -> tun2socks -> internet
 	proxyFd := fds[0]  // used by throttle layer
 	engineFd := fds[1] // passed to tun2socks engine
 
-	// Start tun2socks engine with one end of the socketpair
 	key := &engine.Key{
 		Device: fmt.Sprintf("fd://%d", engineFd),
 		Proxy:  "direct://",
@@ -64,7 +59,6 @@ func Start(fd int, speedKbps int) {
 	engine.Insert(key)
 	engine.Start()
 
-	// Retain file handles (reused by SetSpeed)
 	tunFile = os.NewFile(uintptr(fd), "tun")
 	proxyFile = os.NewFile(uintptr(proxyFd), "proxy")
 
@@ -87,12 +81,10 @@ func SetSpeed(speedKbps int) {
 		return
 	}
 
-	// Stop existing goroutines
 	if relayCancel != nil {
 		relayCancel()
 	}
 
-	// Restart goroutines with new limiters
 	startRelay(speedKbps)
 }
 
