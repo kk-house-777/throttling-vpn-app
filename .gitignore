@@ -32,3 +32,6 @@ proguard.txt
 # Flavor build outputs (AAB/APK)
 app/play/
 app/fdroid/
+
+# Play Store service account key
+sa-key.json
