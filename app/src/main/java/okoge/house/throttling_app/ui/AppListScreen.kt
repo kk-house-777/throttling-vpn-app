@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +50,7 @@ fun AppListScreen(
 
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Target Apps") },
@@ -59,6 +62,7 @@ fun AppListScreen(
                         )
                     }
                 },
+                windowInsets = WindowInsets(0, 0, 0, 0),
             )
         },
     ) { innerPadding ->
@@ -66,8 +70,9 @@ fun AppListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
-                .imePadding(),
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
+                .padding(horizontal = 16.dp),
         ) {
             Card(
                 colors = CardDefaults.cardColors(
