@@ -10,6 +10,9 @@ on:
         type: choice
         options:
           - production
+          - internal
+          - alpha
+          - beta
 
 concurrency:
   group: deploy-play
