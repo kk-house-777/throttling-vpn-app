@@ -47,18 +47,26 @@ Key components:
 
 ## Tech Stack
 
-- Kotlin 2.3.20, Compose, Material 3, Navigation 3
-- Target/Compile SDK 37, Min SDK 26, Java 11
-- Go 1.25.0 + gomobile (tun2socks v2.6.0, gVisor TCP/IP stack)
-- AGP 9.4.0 / Gradle 9.7.1, version catalog at `gradle/libs.versions.toml`
-- Compose は BOM を使わず各ライブラリのバージョンを version catalog に直接ピン留めしている。
-  BOM だと解決後のバージョンが catalog から見えず、API レベル要求の踏み抜き(compileSdk 37 要求など)を
-  読み解くのが難しかったため。Renovate 側は `renovate.json` の packageRule で1PRにグルーピングしている。
+Kotlin + Compose (Material 3 / Navigation 3)、ネットワーク層は Go + gomobile。
+
+バージョン番号はここに書かない(すぐ古くなるため)。それぞれの単一の情報源:
+
+| 何 | どこ |
+| --- | --- |
+| ライブラリ / Kotlin / AGP | `gradle/libs.versions.toml` |
+| Gradle | `gradle/wrapper/gradle-wrapper.properties` |
+| compileSdk / targetSdk / minSdk / Java | `app/build.gradle.kts` |
+| Go / tun2socks | `go/tun2sockslib/go.mod` |
+
+Compose は BOM を使わず各ライブラリのバージョンを version catalog に直接ピン留めしている。
+BOM だと解決後のバージョンが catalog から見えず、ライブラリ側が要求する compileSdk の
+引き上げなどを読み解くのが難しかったため。Renovate 側は `renovate.json` の packageRule で
+1PRにグルーピングしている。
 
 ## Notes
 
 - License screen (AboutLibraries) is WIP — button and navigation are temporarily disabled
-- `app/src/test/resources/robolectric.properties` で Robolectric のエミュレート SDK を 36 に固定している。
-  targetSdk 37 に対して Robolectric 4.16.1 の同梱 SDK が 36 までのため。API 37 対応版が stable
-  になったらこのファイルごと削除してよい。
+- `app/src/test/resources/robolectric.properties` でエミュレートする SDK を固定している。
+  targetSdk を上げた時に Robolectric の同梱 SDK が未対応だと `Package targetSdkVersion=N >
+  maxSdkVersion=M` で全テストが起動できなくなるため。Robolectric が追いついたら削除してよい。
 - `ins.md` contains the Japanese development guide with phased architecture explanation
