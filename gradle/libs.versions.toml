@@ -14,7 +14,7 @@ kotlinxSerializationCore = "1.9.0"
 androidxTestCore = "1.7.0"
 coroutinesTest = "1.11.0"
 robolectric = "4.16.1"
-datastorePreferences = "1.1.7"
+datastorePreferences = "1.2.1"
 aboutLibraries = "14.2.1"
 
 [libraries]
