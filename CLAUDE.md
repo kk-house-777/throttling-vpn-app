@@ -47,12 +47,18 @@ Key components:
 
 ## Tech Stack
 
-- Kotlin 2.3.20, Compose BOM 2026.03.01, Material 3, Navigation 3
-- Target/Compile SDK 36, Min SDK 26, Java 11
+- Kotlin 2.3.20, Compose, Material 3, Navigation 3
+- Target/Compile SDK 37, Min SDK 26, Java 11
 - Go 1.25.0 + gomobile (tun2socks v2.6.0, gVisor TCP/IP stack)
-- Gradle 9.1.0, version catalog at `gradle/libs.versions.toml`
+- AGP 9.4.0 / Gradle 9.7.1, version catalog at `gradle/libs.versions.toml`
+- Compose は BOM を使わず各ライブラリのバージョンを version catalog に直接ピン留めしている。
+  BOM だと解決後のバージョンが catalog から見えず、API レベル要求の踏み抜き(compileSdk 37 要求など)を
+  読み解くのが難しかったため。Renovate 側は `renovate.json` の packageRule で1PRにグルーピングしている。
 
 ## Notes
 
 - License screen (AboutLibraries) is WIP — button and navigation are temporarily disabled
+- `app/src/test/resources/robolectric.properties` で Robolectric のエミュレート SDK を 36 に固定している。
+  targetSdk 37 に対して Robolectric 4.16.1 の同梱 SDK が 36 までのため。API 37 対応版が stable
+  になったらこのファイルごと削除してよい。
 - `ins.md` contains the Japanese development guide with phased architecture explanation
