@@ -1,6 +1,7 @@
 // Package tun2sockslib wraps xjasonlyu/tun2socks v2 engine for Android VpnService.
 //
 // Throttling (rate limiting) is inserted between the TUN interface and tun2socks.
+//
 //	TUN fd <-> [throttle layer] <-> socketpair <-> tun2socks engine
 //
 // This wrapper is compiled to .aar via gomobile bind and called from Kotlin.
@@ -13,6 +14,7 @@ import (
 	"os"
 	"sync"
 	"syscall"
+	"time"
 
 	"golang.org/x/time/rate"
 
@@ -24,9 +26,10 @@ const mtu = 1500
 
 var (
 	relayCancel context.CancelFunc
-	tunFile   *os.File
-	proxyFile *os.File
-	mu        sync.Mutex
+	relayWg     sync.WaitGroup
+	tunFile     *os.File
+	proxyFile   *os.File
+	mu          sync.Mutex
 )
 
 // Start receives a TUN fd and begins packet forwarding with rate limiting.
@@ -59,6 +62,15 @@ func Start(fd int, speedKbps int) {
 	engine.Insert(key)
 	engine.Start()
 
+	// os.NewFile only registers a fd with Go's runtime poller (required for
+	// SetDeadline to actually interrupt a blocked Read/Write, and for a
+	// concurrent Close to unblock one safely) if the fd is already
+	// non-blocking. Without this, stopRelay's SetDeadline call is silently a
+	// no-op, relayWg.Wait() never returns, and Stop() hangs the calling
+	// thread forever (ANR).
+	_ = syscall.SetNonblock(fd, true)
+	_ = syscall.SetNonblock(proxyFd, true)
+
 	tunFile = os.NewFile(uintptr(fd), "tun")
 	proxyFile = os.NewFile(uintptr(proxyFd), "proxy")
 
@@ -81,10 +93,7 @@ func SetSpeed(speedKbps int) {
 		return
 	}
 
-	if relayCancel != nil {
-		relayCancel()
-	}
-
+	stopRelay()
 	startRelay(speedKbps)
 }
 
@@ -94,10 +103,7 @@ func Stop() {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if relayCancel != nil {
-		relayCancel()
-		relayCancel = nil
-	}
+	stopRelay()
 	engine.Stop()
 	// Close the dup'd fd. This lets the OS recognize there are no more references
 	// to the TUN, fully closing the VPN interface and removing the key icon from the status bar.
@@ -111,6 +117,33 @@ func Stop() {
 	}
 }
 
+// stopRelay cancels the running relay goroutines and waits for them to fully
+// exit before returning. Must be called with mu held.
+//
+// ctx cancellation alone does not interrupt a goroutine parked in a blocking
+// Read/Write syscall, so a past version of this code closed tunFile/proxyFile
+// immediately after cancelling — while a relay goroutine could still be
+// mid-syscall on that same fd. Once closed, the fd number can be reassigned
+// to something else in the process, and the still-running goroutine's syscall
+// completing afterward corrupts fd ownership tracking, which crashes the app
+// with a SIGABRT from fdsan ("fd is owned by unique_fd, was expected to be
+// unowned"). Setting an immediate deadline unblocks the syscalls without
+// closing the file, so relayWg.Wait() can complete before anything is closed.
+func stopRelay() {
+	if relayCancel == nil {
+		return
+	}
+	relayCancel()
+	relayCancel = nil
+	if tunFile != nil {
+		tunFile.SetDeadline(time.Now())
+	}
+	if proxyFile != nil {
+		proxyFile.SetDeadline(time.Now())
+	}
+	relayWg.Wait()
+}
+
 // startRelay launches throttle goroutines. Must be called with mu held.
 //
 // speedKbps: -1 = Block, 0 = Unlimited, >0 = Throttle
@@ -120,11 +153,19 @@ func startRelay(speedKbps int) {
 	ctx, cancel := context.WithCancel(context.Background())
 	relayCancel = cancel
 
+	relayWg.Add(2)
+
 	// Upload: TUN -> (throttle) -> socketpair -> tun2socks -> internet
-	go throttleRelay(ctx, tunFile, proxyFile, ul)
+	go func() {
+		defer relayWg.Done()
+		throttleRelay(ctx, tunFile, proxyFile, ul)
+	}()
 
 	// Download: internet -> tun2socks -> socketpair -> (throttle) -> TUN
-	go throttleRelay(ctx, proxyFile, tunFile, dl)
+	go func() {
+		defer relayWg.Done()
+		throttleRelay(ctx, proxyFile, tunFile, dl)
+	}()
 }
 
 // makeLimiters creates a pair of token bucket limiters based on the speed setting.
@@ -160,14 +201,14 @@ func makeLimiters(speedKbps int) (upload, download *rate.Limiter) {
 func throttleRelay(ctx context.Context, src, dst *os.File, limiter *rate.Limiter) {
 	buf := make([]byte, mtu)
 	for {
-	    // 停止チェック
+		// 停止チェック
 		select {
 		case <-ctx.Done():
 			return
 		default:
 		}
 
-        // OSからパケットの実態を1500バイト読み取る。fd経由, nはサイズ
+		// OSからパケットの実態を1500バイト読み取る。fd経由, nはサイズ
 		n, err := src.Read(buf)
 		if err != nil {
 			if ctx.Err() != nil {
