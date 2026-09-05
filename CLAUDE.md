@@ -43,7 +43,7 @@ Key components:
 
 **Speed units:** UI displays kbps. Go layer expects KB/s. Conversion: `kbpsToKBps() = kbps / 8`. Speed modes: Block (< 0), Unlimited (0), Throttle (> 0).
 
-**Prebuilt AAR:** `app/libs/tun2socks.aar` is checked in. Only rebuild when Go code changes.
+**AAR build:** `app/libs/tun2socks.aar` is gitignored, not checked in — it's rebuilt from Go source on every CI run (see `.github/workflows/unit-test.yml`) rather than vendored, since this repo also ships an `fdroid` flavor and F-Droid's build process expects reproducible builds from source rather than opaque prebuilt binaries. For local development, run the `gomobile bind` command above once; `app/libs/tun2socks.aar` must exist before any Gradle task that builds the `app` module will succeed.
 
 ## Tech Stack
 
