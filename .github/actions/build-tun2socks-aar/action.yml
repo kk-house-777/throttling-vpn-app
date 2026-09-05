@@ -1,0 +1,45 @@
+name: Build tun2socks AAR
+description: >
+  Rebuilds app/libs/tun2socks.aar from go/tun2sockslib via gomobile.
+  Not vendored as a binary: this repo ships an fdroid flavor, and F-Droid's
+  build pipeline expects a reproducible build from source rather than an
+  opaque prebuilt blob.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      with:
+        go-version-file: go/tun2sockslib/go.mod
+        cache-dependency-path: go/tun2sockslib/go.sum
+
+    - name: Export ANDROID_HOME to the expression context
+      # The runner image sets ANDROID_HOME as an OS-level env var, which
+      # `${{ env.ANDROID_HOME }}` below cannot see until it's also written
+      # to GITHUB_ENV — only vars set that way are visible to expressions.
+      shell: bash
+      run: echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+
+    - name: Cache Android NDK
+      id: ndk-cache
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ env.ANDROID_HOME }}/ndk/29.0.14206865
+        key: android-ndk-29.0.14206865
+
+    - name: Install Android NDK
+      if: steps.ndk-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.14206865"
+
+    - name: gomobile bind
+      shell: bash
+      run: |
+        export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/29.0.14206865"
+        go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260410095206-2cfb76559b7b
+        go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260410095206-2cfb76559b7b
+        export PATH="$PATH:$(go env GOPATH)/bin"
+        gomobile init
+        mkdir -p app/libs
+        cd go/tun2sockslib
+        gomobile bind -target=android -androidapi 26 -o ../../app/libs/tun2socks.aar .
