@@ -43,9 +43,24 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment: play-store
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Bump versionCode
+        run: |
+          set -euo pipefail
+          current=$(grep -oP '(?<=versionCode = )\d+' app/build.gradle.kts)
+          next=$((current + 1))
+          sed -i "s/versionCode = $current/versionCode = $next/" app/build.gradle.kts
+          echo "versionCode: $current -> $next"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/build.gradle.kts
+          git commit -m "ci: bump versionCode to $next [skip ci]"
+          git push origin HEAD:main
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
@@ -74,3 +89,4 @@ jobs:
           packageName: okoge.house.throttling_app.play
           releaseFiles: app/build/outputs/bundle/playRelease/app-play-release.aab
           track: ${{ inputs.track }}
+          whatsNewDirectory: distribution/whatsnew
