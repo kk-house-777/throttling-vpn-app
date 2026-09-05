@@ -2,5 +2,16 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "description": "Compose BOM をやめて個別バージョン管理にしたため、androidx.compose.* は1つのPRにまとめる (#20)",
+      "matchPackageNames": [
+        "androidx.compose.ui:**",
+        "androidx.compose.foundation:**",
+        "androidx.compose.material3:**"
+      ],
+      "groupName": "androidx compose"
+    }
   ]
 }

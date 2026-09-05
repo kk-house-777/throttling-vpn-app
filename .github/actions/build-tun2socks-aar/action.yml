@@ -21,28 +21,21 @@ runs:
         go-version-file: go/tun2sockslib/go.mod
         cache-dependency-path: go/tun2sockslib/go.sum
 
-    - name: Export ANDROID_HOME to the expression context
-      # The runner image sets ANDROID_HOME as an OS-level env var, which
-      # `${{ env.ANDROID_HOME }}` below cannot see until it's also written
-      # to GITHUB_ENV — only vars set that way are visible to expressions.
+    - name: Ensure Android NDK
+      # The ubuntu runner image already ships this NDK (ANDROID_NDK_LATEST_HOME),
+      # so normally nothing is downloaded here. Caching the NDK directory instead
+      # of this check is actively harmful: the preinstalled tree is root-owned, so
+      # actions/cache's tar restore fails with "Cannot utime: Operation not
+      # permitted". sdkmanager only runs if a future image drops this version.
       if: steps.aar-cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
-
-    - name: Cache Android NDK
-      id: ndk-cache
-      if: steps.aar-cache.outputs.cache-hit != 'true'
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-      with:
-        path: ${{ env.ANDROID_HOME }}/ndk/29.0.14206865
-        key: android-ndk-29.0.14206865
-
-    - name: Install Android NDK
-      if: steps.aar-cache.outputs.cache-hit != 'true' && steps.ndk-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        set +o pipefail
-        yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.14206865"
+        if [ -d "$ANDROID_HOME/ndk/29.0.14206865" ]; then
+          echo "NDK 29.0.14206865 already present, skipping install"
+        else
+          set +o pipefail
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.14206865"
+        fi
 
     - name: gomobile bind
       if: steps.aar-cache.outputs.cache-hit != 'true'
