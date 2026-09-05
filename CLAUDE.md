@@ -47,10 +47,16 @@ Key components:
 
 ## Tech Stack
 
-- Kotlin 2.3.20, Compose BOM 2026.03.01, Material 3, Navigation 3
-- Target/Compile SDK 36, Min SDK 26, Java 11
-- Go 1.25.0 + gomobile (tun2socks v2.6.0, gVisor TCP/IP stack)
-- Gradle 9.1.0, version catalog at `gradle/libs.versions.toml`
+Kotlin + Compose (Material 3 / Navigation 3)、ネットワーク層は Go + gomobile。
+
+バージョン番号はここに書かない(すぐ古くなるため)。それぞれの単一の情報源:
+
+| 何 | どこ |
+| --- | --- |
+| ライブラリ / Kotlin / AGP | `gradle/libs.versions.toml` |
+| Gradle | `gradle/wrapper/gradle-wrapper.properties` |
+| compileSdk / targetSdk / minSdk / Java | `app/build.gradle.kts` |
+| Go / tun2socks | `go/tun2sockslib/go.mod` |
 
 ## Notes
 
