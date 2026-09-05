@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+    Only declared for the fdroid flavor: lets the target-app picker list all
+    installed apps by name instead of requiring a raw package name. Kept out
+    of the play flavor since Play Store policy restricts QUERY_ALL_PACKAGES
+    to a narrow set of approved use cases.
+    -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+</manifest>
