@@ -32,7 +32,12 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      # cache-provider は MIT の basic を使う : デフォルトの enhanced はプロプライエタリな
+      # gradle-actions-caching を読み込み Gradle の ToU 同意が必要になる
+      # https://github.com/gradle/actions/blob/v6.3.0/DISTRIBUTION.md
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-provider: basic
 
       - uses: ./.github/actions/build-tun2socks-aar
 
@@ -76,7 +81,12 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      # cache-provider は MIT の basic を使う : デフォルトの enhanced はプロプライエタリな
+      # gradle-actions-caching を読み込み Gradle の ToU 同意が必要になる
+      # https://github.com/gradle/actions/blob/v6.3.0/DISTRIBUTION.md
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-provider: basic
 
       - uses: ./.github/actions/build-tun2socks-aar
 
