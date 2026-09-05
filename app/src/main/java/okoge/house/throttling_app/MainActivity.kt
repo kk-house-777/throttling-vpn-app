@@ -20,16 +20,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import okoge.house.throttling_app.data.InstalledApp
+import okoge.house.throttling_app.data.InstalledAppsProvider
+import okoge.house.throttling_app.data.InstalledAppsProviderImpl
 import okoge.house.throttling_app.data.TargetAppRepository
 import okoge.house.throttling_app.ui.AppListScreen
 import okoge.house.throttling_app.ui.LicenseScreen
@@ -56,6 +62,7 @@ class MainActivity : ComponentActivity() {
     private var sliderValue by mutableFloatStateOf(0.5f)
 
     private lateinit var repository: TargetAppRepository
+    private lateinit var installedAppsProvider: InstalledAppsProvider
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -81,6 +88,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         repository = TargetAppRepository(applicationContext)
+        installedAppsProvider = InstalledAppsProviderImpl(applicationContext)
         setContent {
             ThrottlingappTheme {
                 val backStack = remember { mutableStateListOf<Any>(MainRoute) }
@@ -134,6 +142,11 @@ class MainActivity : ComponentActivity() {
                                  )
                              }
                             entry<AppListRoute> {
+                                val installedApps by produceState(initialValue = emptyList<InstalledApp>()) {
+                                    value = withContext(Dispatchers.IO) {
+                                        installedAppsProvider.listInstalledApps()
+                                    }
+                                }
                                 AppListScreen(
                                     targetApps = targetApps,
                                     onAddApp = { pkg ->
@@ -143,6 +156,7 @@ class MainActivity : ComponentActivity() {
                                         lifecycleScope.launch { repository.removeApp(pkg) }
                                     },
                                     onBack = { backStack.removeLastOrNull() },
+                                    installedApps = installedApps,
                                 )
                             }
                         },

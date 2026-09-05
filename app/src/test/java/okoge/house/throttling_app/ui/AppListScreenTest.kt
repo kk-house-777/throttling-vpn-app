@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import okoge.house.throttling_app.data.InstalledApp
 import okoge.house.throttling_app.ui.theme.ThrottlingappTheme
 import org.junit.Rule
 import org.junit.Test
@@ -24,6 +25,7 @@ class AppListScreenTest {
         onAddApp: (String) -> Unit = {},
         onRemoveApp: (String) -> Unit = {},
         onBack: () -> Unit = {},
+        installedApps: List<InstalledApp> = emptyList(),
     ) {
         composeTestRule.setContent {
             ThrottlingappTheme {
@@ -32,6 +34,7 @@ class AppListScreenTest {
                     onAddApp = onAddApp,
                     onRemoveApp = onRemoveApp,
                     onBack = onBack,
+                    installedApps = installedApps,
                 )
             }
         }
@@ -95,5 +98,78 @@ class AppListScreenTest {
         composeTestRule.onNodeWithContentDescription("Back").performClick()
 
         assert(backPressed)
+    }
+
+    // ── installed app picker ──
+
+    @Test
+    fun noInstalledApps_pickerButtonHidden() {
+        setContent(installedApps = emptyList())
+        composeTestRule.onNodeWithText("Pick from installed apps").assertDoesNotExist()
+    }
+
+    @Test
+    fun hasInstalledApps_pickerButtonShown() {
+        setContent(installedApps = listOf(InstalledApp("com.example.a", "App A")))
+        composeTestRule.onNodeWithText("Pick from installed apps").assertIsDisplayed()
+    }
+
+    @Test
+    fun openingPicker_showsInstalledApps() {
+        setContent(
+            installedApps = listOf(
+                InstalledApp("com.example.a", "App A"),
+                InstalledApp("com.example.b", "App B"),
+            ),
+        )
+        composeTestRule.onNodeWithText("Pick from installed apps").performClick()
+
+        composeTestRule.onNodeWithText("App A").assertIsDisplayed()
+        composeTestRule.onNodeWithText("App B").assertIsDisplayed()
+    }
+
+    @Test
+    fun picker_alreadyTargetedAppsAreExcluded() {
+        setContent(
+            targetApps = setOf("com.example.a"),
+            installedApps = listOf(
+                InstalledApp("com.example.a", "App A"),
+                InstalledApp("com.example.b", "App B"),
+            ),
+        )
+        composeTestRule.onNodeWithText("Pick from installed apps").performClick()
+
+        composeTestRule.onNodeWithText("App A").assertDoesNotExist()
+        composeTestRule.onNodeWithText("App B").assertIsDisplayed()
+    }
+
+    @Test
+    fun picker_searchFiltersByLabelOrPackageName() {
+        setContent(
+            installedApps = listOf(
+                InstalledApp("com.example.a", "App A"),
+                InstalledApp("com.example.b", "App B"),
+            ),
+        )
+        composeTestRule.onNodeWithText("Pick from installed apps").performClick()
+        composeTestRule.onNodeWithText("Search").performTextInput("App A")
+
+        // "App A" also matches the search field's own value, so assert on the
+        // one unambiguous signal that filtering actually happened: App B is gone.
+        composeTestRule.onNodeWithText("App B").assertDoesNotExist()
+    }
+
+    @Test
+    fun picker_selectingApp_invokesOnAddAppAndCloses() {
+        var added: String? = null
+        setContent(
+            onAddApp = { added = it },
+            installedApps = listOf(InstalledApp("com.example.a", "App A")),
+        )
+        composeTestRule.onNodeWithText("Pick from installed apps").performClick()
+        composeTestRule.onNodeWithText("App A").performClick()
+
+        assert(added == "com.example.a")
+        composeTestRule.onNodeWithText("Select an app").assertDoesNotExist()
     }
 }
