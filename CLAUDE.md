@@ -58,15 +58,7 @@ Kotlin + Compose (Material 3 / Navigation 3)、ネットワーク層は Go + gom
 | compileSdk / targetSdk / minSdk / Java | `app/build.gradle.kts` |
 | Go / tun2socks | `go/tun2sockslib/go.mod` |
 
-Compose は BOM を使わず各ライブラリのバージョンを version catalog に直接ピン留めしている。
-BOM だと解決後のバージョンが catalog から見えず、ライブラリ側が要求する compileSdk の
-引き上げなどを読み解くのが難しかったため。Renovate 側は `renovate.json` の packageRule で
-1PRにグルーピングしている。
-
 ## Notes
 
 - License screen (AboutLibraries) is WIP — button and navigation are temporarily disabled
-- `app/src/test/resources/robolectric.properties` でエミュレートする SDK を固定している。
-  targetSdk を上げた時に Robolectric の同梱 SDK が未対応だと `Package targetSdkVersion=N >
-  maxSdkVersion=M` で全テストが起動できなくなるため。Robolectric が追いついたら削除してよい。
 - `ins.md` contains the Japanese development guide with phased architecture explanation

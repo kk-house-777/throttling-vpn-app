@@ -7,6 +7,9 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 kotlin = "2.3.20"
+# Compose は BOM を使わない: 解決後のバージョンがこのファイルから見えないと、
+# ライブラリ側が要求する compileSdk の引き上げなどを追いにくいため。
+# Renovate は renovate.json の packageRule で1PRにまとめている。
 composeUi = "1.12.0"
 composeMaterial3 = "1.4.0"
 composeMaterialIcons = "1.7.8"
