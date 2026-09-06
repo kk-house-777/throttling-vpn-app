@@ -1,0 +1,14 @@
+name: Add to Project
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  add-to-project:
+    uses: kk-house-777-lab/kk-repo/.github/workflows/add-to-project.yml@main
+    with:
+      project-url: https://github.com/orgs/kk-house-777-lab/projects/1
+    secrets:
+      app-id: ${{ secrets.KK_HOUSE_777_LAB_GITHUB_APP_ID }}
+      app-private-key: ${{ secrets.KK_HOUSE_777_LAB_GITHUB_APP_PRIVATE_KEY }}
