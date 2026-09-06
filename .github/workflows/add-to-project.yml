@@ -10,4 +10,5 @@ jobs:
     with:
       project-url: https://github.com/orgs/kk-house-777-lab/projects/1
     secrets:
-      project-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+      app-id: ${{ secrets.APP_ID }}
+      app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
