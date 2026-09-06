@@ -16,19 +16,6 @@
         "androidx.compose.material3:**"
       ],
       "groupName": "androidx compose"
-    },
-    {
-      "description": "patch / pin / digest は CI が通れば自動マージ",
-      "matchUpdateTypes": ["patch", "pin", "digest"],
-      "automerge": true,
-      "platformAutomerge": true
-    },
-    {
-      "description": "1.0.0 以降の minor は自動マージ。0.x は minor でも破壊的変更があり得るため対象外",
-      "matchUpdateTypes": ["minor"],
-      "matchCurrentVersion": "!/^0\\./",
-      "automerge": true,
-      "platformAutomerge": true
     }
   ]
 }
