@@ -1,0 +1,32 @@
+name: Claude
+
+# prompt を渡さないので interactive モードになり、コメントで @claude と呼ばれたときだけ動く。
+# 各リポジトリの CLAUDE.md は自動で読まれるので、設計原則はそのまま指示の前提になる。
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude:
+    # ランナーを無駄に起動しないための足切り。action 側でも trigger phrase を見ている。
+    if: contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # 軽微な修正を PR ブランチに直接コミットさせる
+      pull-requests: write
+      issues: write
+      id-token: write # claude-code-action の既定の GitHub App 認証に必要
+      actions: read # CI の結果を読ませる
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude
+        uses: anthropics/claude-code-action@b7912aeeb535234e3e9385ff49e8237f689b5f14 # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
