@@ -15,7 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: write # 軽微な修正を PR ブランチに直接コミットさせる
+      # public リポジトリなので read に絞る。Claude にコミットはさせず、
+      # 修正は人間が取り込む。第三者が書いた本文を読んだ状態で書き込み権限を
+      # 持たせない、というのが理由。
+      contents: read
       pull-requests: write
       issues: write
       id-token: write # claude-code-action の既定の GitHub App 認証に必要
@@ -28,5 +31,15 @@ jobs:
 
       - name: Run Claude
         uses: anthropics/claude-code-action@b7912aeeb535234e3e9385ff49e8237f689b5f14 # v1
+        # 組織で唯一の public リポジトリ。誰でも issue / PR コメントを書けるので、
+        # 起動できるのが write 権限を持つ「人間」だけであることが一番の防壁になっている。
+        # allowed_bots と allowed_non_write_users は意図的に設定していない。
+        #
+        # 警告: allowed_bots に足した bot はリポジトリ権限をチェックされない。
+        # リポジトリにインストールされている必要も write 権限も無いため、public な
+        # このリポジトリでは write 権限チェックを丸ごとバイパスする穴になる。
+        # Slack などから @claude を呼ぶ導線を作るときは、ここに bot を足すのではなく、
+        # Slack 側がユーザーのアカウントとして投稿する経路を選ぶこと。
+        # https://github.com/anthropics/claude-code-action/blob/main/docs/security.md
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
